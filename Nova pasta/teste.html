@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Título da página</title>
+	<meta charset="UTF-8"/>
+        <script>
+            var c;
+            var ctx;
+            var click = false;
+            var x;
+            var y;
+            var posiLc;
+            var posiTc;
+            var id;
+            var lado;
+            var funcionarios = []; 
+            var abert = 0;
+            var fecha = 15;
+            var resolucao = 5;
+            var larLinha = 30;
+            var tabela = [100, 30, fecha-abert, funcionarios.length*larLinha];
+
+
+            function getCanvas(){
+                c = document.getElementById('canvas');
+                ctx = c.getContext('2d');
+                posiLc = c.getBoundingClientRect().left;
+                posiTc = c.getBoundingClientRect().top;
+                horas();
+                c.addEventListener('mousemove', function(evt){
+                    x = evt.clientX-posiLc;
+                    y = evt.clientY-posiTc;
+                    if(!click && areatabela()){
+                        getId();
+                        if(id!=0){
+                            selLado(id-1);
+                        }
+                        
+                    }
+                    else{
+                        if(lado && id!=0 && areatabela()){
+                            var obj = funcionarios[id-1];
+                            if(lado==1){
+                                if(x>obj.xi1+3){
+                                    obj.xi1 += resolucao;
+                                    obj.larg1 = obj.xf1 - obj.xi1;
+                                }
+                                else if(x<obj.xi1-3){
+                                    obj.xi1 -= resolucao;
+                                    obj.larg1 = obj.xf1 - obj.xi1;
+                                }
+                                
+                            }
+                            if(lado==2){
+                                if(x>obj.xf1+3){
+                                    obj.xf1 += resolucao;
+                                    obj.larg1 = obj.xf1 - obj.xi1;	
+                                }
+                                else if(x<obj.xf1-3){
+                                    obj.xf1 -= resolucao;
+                                    obj.larg1 = obj.xf1 - obj.xi1;
+                                }
+                            }
+                            if(lado==3){
+                                if(x>obj.xi2+3){
+                                    obj.xi2 += resolucao;
+                                    obj.larg2 = obj.xf2 - obj.xi2;
+                                }
+                                else if(x<obj.xi2-3){
+                                    obj.xi2 -= resolucao;
+                                    obj.larg2 = obj.xf2 - obj.xi2;	
+                                }
+                            }
+                            if(lado==4){
+                                if(x>obj.xf2+3){
+                                    obj.xf2 += resolucao;
+                                    obj.larg2 = obj.xf2 - obj.xi2;
+                                }
+                                else if(x<obj.xf2-3){
+                                    obj.xf2 -= resolucao;
+                                    obj.larg2 = obj.xf2 - obj.xi2;
+                                }
+                            }
+                            funcionarios[id-1] = obj;
+                            funcionarios.forEach(unselect);
+                        }
+                    }
+                });
+
+                c.addEventListener('mousedown', function(){
+                    click = true;
+                    if(areatabela()){
+                        getId();
+                    }
+                });
+
+                c.addEventListener('mouseup', function(){
+                    click = false;
+                    id = -1;
+                });
+                c.addEventListener('mouseout', function(){
+                    click = false;
+                    id= -1;
+                });
+            }
+
+            function funcio(nome){
+                var funcionario = {
+                    nome: nome,
+                    xi1: tabela[0],
+                    larg1: 30*resolucao,
+                    xf1: tabela[0]+30*resolucao,
+                    xi2: tabela[0]+36*resolucao,
+                    larg2: 14*resolucao,
+                    xf2: tabela[0]+50*resolucao
+                };
+                return funcionario;
+            }
+
+            function criar(){
+                var nome = prompt('Nome:');
+                var funcionario = funcio(nome);
+                funcionarios.push(funcionario);
+                console.log(funcionarios);
+                construir(funcionarios.length-1);
+                tabela[3] = funcionarios.length*larLinha;
+            }
+
+            function construir(posicao){
+                var fun = funcionarios[posicao];
+		        var nome = fun.nome;
+                var xi1 = fun.xi1;
+                var larg1 = fun.larg1;
+                var xf1 = fun.xf1;
+                var xi2 = fun.xi2;
+                var larg2 = fun.larg2;
+                var xf2 = fun.xf2;
+                var cor = setCor(posicao);
+		        var carga = cargaH(larg1+larg2);
+                var inter = cargaH(xi2-xf1);
+                var esp = -tabela[0]+(abert*resolucao*6);
+                var horario = "Carga horária: "+carga+ " - Intervalo: "+inter;
+                horario += " | Ponto: "+cargaH(xi1-tabela[0]+(abert*resolucao*6))+"-"+cargaH(xf1+esp)+"-"+cargaH(xi2+esp)+"-"+cargaH(xf2+esp);
+                var yRect = posicao*larLinha+tabela[1];
+		        ctx.font = "15px Arial";
+                ctx.fillStyle = "#000";
+                ctx.textAlign = "start";
+                ctx.clearRect(0,yRect,c.width,larLinha);
+                ctx.fillText(nome+":", 10, tabela[1]+(posicao*larLinha)+(larLinha/2));
+		        ctx.fillText(horario, tabela[0]+(tabela[2]*resolucao*6)+10, tabela[1]+(posicao*larLinha)+(larLinha/2));
+                ctx.fillStyle = cor;
+                ctx.fillRect(xi1,yRect,larg1,20);
+                ctx.fillRect(xi2,yRect,larg2,20);
+            }
+
+            function selLado(posicao){
+                ctx.fillStyle = "#000";
+                if(funcionarios.length>0 && posicao<=funcionarios.length-1){
+                    var obj = funcionarios[posicao];
+                    var yRect = posicao*larLinha+tabela[1];
+                    if(x>= obj.xi1-3 && x<=obj.xi1+3){
+                    var h = cargaH(obj.xi1-tabela[0]+(abert*resolucao*6));
+                    ctx.clearRect(0,yRect+larLinha-10,c.width,10);
+                        ctx.fillRect(obj.xi1, yRect, 1, 20);
+                        ctx.textAlign = "center";
+                        ctx.fillText(h, obj.xi1, yRect+larLinha);
+                        lado = 1;
+                    }
+                    else if(x>=obj.xf1-3 && x<=obj.xf1+3){
+                        var h = cargaH(obj.xf1-tabela[0]+(abert*resolucao*6));
+                        ctx.clearRect(0,yRect+larLinha-10,c.width,10);
+                        ctx.fillRect(obj.xf1, yRect, -1, 20);
+                        ctx.textAlign = "center";
+                        ctx.fillText(h, obj.xf1, yRect+larLinha);
+                        lado = 2;
+                    }
+                    else if(x>=obj.xi2-3 && x<=obj.xi2+3){
+                        var h = cargaH(obj.xi2-tabela[0]+(abert*resolucao*6));
+                        ctx.clearRect(0,yRect+larLinha-10,c.width,10);
+                        ctx.fillRect(obj.xi2, yRect, 1, 20);
+                        ctx.textAlign = "center";
+                        ctx.fillText(h, obj.xi2, yRect+larLinha);
+                        lado = 3;
+                    }
+                    else if(x>=obj.xf2-3 && x<=obj.xf2+3){
+                        var h = cargaH(obj.xf2-tabela[0]+(abert*resolucao*6));
+                        ctx.clearRect(0,yRect+larLinha-10,c.width,10);
+                        ctx.fillRect(obj.xf2, yRect, -1, 20);
+                        ctx.textAlign = "center";
+                        ctx.fillText(h, obj.xf2, yRect+larLinha);
+                        lado = 4;
+                    }
+                    else {
+                        funcionarios.forEach(unselect);
+                        lado = false;
+                    }
+                }
+                else {
+                    lado = false;
+                    funcionarios.forEach(unselect);
+                }
+            }
+
+            function unselect(value, index, array) {
+                construir(index); 
+            }
+
+            function areatabela(){
+                if((x >=tabela[0] && x<=tabela[0]+tabela[2]*resolucao*6) && (y>=tabela[1] && y<=tabela[1]+(tabela[3]))){
+                    return true;
+                }
+                else{
+                    return false;
+                }
+            }
+
+            function getId(){
+                id = Math.round((y-1-tabela[1])/larLinha+0.5);
+            }
+            
+            function horas(){
+                ctx.clearRect(tabela[0]-10, 0, c.width, 25);
+                var horaexata = abert;
+                for(hora=0; hora<fecha-abert; hora ++){
+                    for(min=0; min<=6; min++){
+                        ctx.fillStyle = "#000";
+                        ctx.fillRect(tabela[0]+(hora*resolucao*6)+min*resolucao, 0, 1, 10);
+                    }
+                    ctx.fillRect(tabela[0]+hora*resolucao*6, 0, 1, 15);
+                    ctx.font = "10px Arial";
+                    ctx.fillStyle = "#000";
+                    ctx.textAlign = "center";
+                    ctx.fillText(horaexata+"h", tabela[0]+hora*resolucao*6, 25);
+                    horaexata++;
+                }
+                ctx.fillRect(tabela[0]+(fecha-abert)*resolucao*6, 0, 1, 15);
+                ctx.font = "10px Arial";
+                ctx.fillStyle = "#000";
+                ctx.textAlign = "center";
+                ctx.fillText(fecha+"h", tabela[0]+(fecha-abert)*resolucao*6, 25);
+            }
+
+            function timeLine(a){
+                if(a.id==1){
+                    abert=a.value;
+                }
+                else{
+                    fecha=a.value;
+                }
+                horas();
+            }
+	    
+            function cargaH(h){
+            var tot = h/5/6;
+            var hora = Math.trunc(tot);
+            var min = Math.round(60*(tot-hora))/1;
+            return hora+":"+min+"h";
+            }
+
+            function setCor(p){
+                switch (p) {
+                    case 0:
+                        return "#FF0000";
+                        break;
+
+                    case 1:
+                        return "#0055FF";
+                        break;
+
+                    case 2:
+                        return "#EA9900";
+                        break;
+                        
+                    case 3:
+                        return "#009B00";
+                        break;
+                }
+            }
+
+            function alterar(){
+                var ind = prompt('id');
+                var nome = prompt('Nome:');
+                var obj = funcionarios[ind];
+                obj.nome = nome;
+                funcionarios[ind] = obj;
+                console.log(funcionarios);
+
+
+            }
+
+            function mostrar(){
+                var ind = prompt('id');
+                console.log(funcionarios[ind].nome);
+
+
+            }
+
+        </script>
+    </head>
+    <body onload="getCanvas()">
+        <canvas id="canvas" width="1050" height="200" style="border: 1px solid #000;"></canvas>
+        <button onclick="criar()">Add funcionario</button>
+        <button onclick="alterar()">Alterar</button>
+        <button onclick="mostrar()">Mostrar</button>
+        <input type="number" onkeyup="timeLine(this)" id="1"/>
+        <input type="number" onkeyup="timeLine(this)" id="2"/>
+    </body>
+</html>

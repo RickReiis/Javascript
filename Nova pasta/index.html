@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Gerenciador de horários</title>
+
+
+        <script type="text/javascript">
+            var c = document.getElementById('canvas');
+            var ctx = c.getContext('2d');
+
+            var funcionario = {
+                nome: "",
+                xi1: 10,
+                larg1: 10,
+                xf1: 20,
+                xi2: 30,
+                larg2: 10,
+                xf2: 40
+            };
+
+            var funcionarios = [];
+
+            function criar(nome){
+                funcionarios.push(funcionario);
+                var tamanho = funcionarios.length-1;
+                funcionarios[tamanho].nome = nome;
+                console.log(funcionarios[tamanho])
+            }
+            function construir(posicao){
+                var fun = funcionarios[posicao];
+                var xi1 = fun.xi1;
+                var larg1 = fun.larg1;
+                var xf1 = fun.xf1;
+                var xi2 = fun.xi2;
+                var larg2 = fun.larg2;
+                var xf2 = fun.xf2;
+                ctx.fillStyle = "#FF0000";
+                ctx.fillRect(xi1,0,larg1,20);
+                ctx.fillRect(xi2,0,larg2,20);
+            }
+
+            function selLado(posi){
+                
+            }
+            construir(0);
+
+            var posiLc = c.getBoundingClientRect().left;
+            var posiTc = c.getBoundingClientRect().top;
+            var x;
+            var y;
+            var id;
+            var click = false;
+            c.addEventListener('mousemove', function(evt){
+                x = evt.clientX-posiLc;
+            y = evt.clientY-posiTc;
+            if(!click){
+            
+            }
+            else{
+            
+            }
+            //console.clear();
+            console.log('x: '+x+', y: '+y+' - id: '+id);
+            });
+
+            c.addEventListener('mousedown', function(){
+                click = true;
+                id = Math.round((y-1)/20+0.5);
+                console.log(id)
+            });
+
+            c.addEventListener('mouseup', function(){
+                click = false;
+                id = -1;
+            });
+        </script>
+    </head>
+    <body>
+        <canvas id="canvas" width="400" height="200" style="border: 1px solid #000"></canvas>
+        <button onclick="criar('Ada')">Add funcionário</button>
+    </body>
+</html>
